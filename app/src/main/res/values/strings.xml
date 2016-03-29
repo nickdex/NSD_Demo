@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">NSD Demo</string>
 
-    <string name="machine_name">Device Name is = </string>
+    <string name="machine_name">Device Name is \n</string>
+    <string name="register_button">Register</string>
+    <string name="discover_button">Discover</string>
 </resources>
