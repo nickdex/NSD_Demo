@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NSD Demo</string>
+
+    <string name="machine_name">Device Name is = </string>
+</resources>
