@@ -5,6 +5,9 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Dexter on 29-Mar-16.
  */
@@ -23,6 +26,13 @@ public class NSDHelper
 
     private NsdServiceInfo nsdServiceInfo;
 
+    ArrayList<String> list = new ArrayList<>();
+
+    public List<String> getList()
+    {
+        return list;
+    }
+
     public NSDHelper(Context context) {
         this.context = context;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
@@ -36,6 +46,7 @@ public class NSDHelper
 
         mNsdManager.registerService(
                 serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+
 
     }
 
@@ -64,6 +75,9 @@ public class NSDHelper
                     return;
                 }
                 nsdServiceInfo = serviceInfo;
+                String id = "Service name : " + nsdServiceInfo.getServiceName() + "\n" + nsdServiceInfo.getHost().getHostName();
+                if (!list.contains(id))
+                    list.add(id);
             }
         };
     }
@@ -78,7 +92,7 @@ public class NSDHelper
 
             @Override
             public void onServiceFound(NsdServiceInfo service) {
-                Log.d(TAG, "Service discovery success" + service);
+                Log.d(TAG, "Service discovery success " + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
                 } else if (service.getServiceName().equals(serviceName)) {
@@ -119,20 +133,25 @@ public class NSDHelper
         mRegistrationListener = new NsdManager.RegistrationListener() {
 
             @Override
-            public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
-                serviceName = NsdServiceInfo.getServiceName();
+            public void onServiceRegistered(NsdServiceInfo nsdServiceInfo)
+            {
+                Log.v(TAG, "Service Registered " + nsdServiceInfo);
+                serviceName = nsdServiceInfo.getServiceName();
             }
 
             @Override
             public void onRegistrationFailed(NsdServiceInfo arg0, int arg1) {
+                Log.e(TAG, "Service Registration failed " + arg0);
             }
 
             @Override
             public void onServiceUnregistered(NsdServiceInfo arg0) {
+                Log.v(TAG, "Service unregistered " + arg0);
             }
 
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                Log.e(TAG, "Service Unregistration failed " + serviceInfo);
             }
 
         };

@@ -22,15 +22,15 @@
             android:id="@+id/register"
             android:layout_margin="4dp"
             android:text="@string/register_button"
-            android:onClick="registerService"/>
+            android:onClick="advertise"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
-            android:text="@string/discover_button"
-            android:onClick="clickDiscover"
-            android:id="@+id/discover"/>
+            android:text="@string/connect_button"
+            android:onClick="connect"
+            android:id="@+id/connect"/>
 
         <TextView
             android:layout_width="0dp"
