@@ -1,6 +1,9 @@
 package me.whichapp.nsddemo;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -26,10 +29,11 @@ public class MainActivity extends AppCompatActivity
 
     ListView deviceList;
 
-    NSDHelper nsdHelper;
 
     private List<String> list = new ArrayList<>();
     private ArrayAdapter<String> adapter;
+
+    private boolean flag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -42,11 +46,16 @@ public class MainActivity extends AppCompatActivity
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
-            requestPermissions(new String[]{Manifest.permission.INTERNET}, RQ_PERM);
+            if (checkSelfPermission(Manifest.permission.INTERNET) == PackageManager.PERMISSION_DENIED)
+            {
+                requestPermissions(new String[]{Manifest.permission.INTERNET}, RQ_PERM);
+            } else
+            {
+                flag = true;
+            }
         } else
         {
-            nsdHelper = new NSDHelper(this);
-            nsdHelper.initializeNsd();
+            flag = true;
         }
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
@@ -62,8 +71,7 @@ public class MainActivity extends AppCompatActivity
             if (i == PackageManager.PERMISSION_GRANTED)
                 if (permissions[i].equals(Manifest.permission.INTERNET))
                 {
-                    nsdHelper = new NSDHelper(this);
-                    nsdHelper.initializeNsd();
+                    flag = true;
                 }
         }
     }
@@ -71,41 +79,25 @@ public class MainActivity extends AppCompatActivity
     public void advertise(View v)
     {
         // Register service
-        nsdHelper.registerService(port);
+        if (flag)
+            MyIntentService.registerService(this);
     }
 
     public void connect(View v)
     {
-        list.clear();
-        list.addAll(nsdHelper.getList());
-        adapter.notifyDataSetChanged();
-//        nsdHelper.discoverServices();
+        MyIntentService.requestUpdate(this);
     }
 
-    @Override
-    protected void onPause()
+
+    private class ResponseReceiver extends BroadcastReceiver
     {
-        if (nsdHelper != null)
+        @Override
+        public void onReceive(Context context, Intent intent)
         {
-            nsdHelper.stopDiscovery();
+            ArrayList<String> newList = intent.getStringArrayListExtra(MyIntentService.LIST);
+            list.clear();
+            list.addAll(newList);
+            adapter.notifyDataSetChanged();
         }
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        if (nsdHelper != null)
-        {
-            nsdHelper.discoverServices();
-        }
-    }
-
-    @Override
-    protected void onDestroy()
-    {
-        nsdHelper.tearDown();
-        super.onDestroy();
     }
 }

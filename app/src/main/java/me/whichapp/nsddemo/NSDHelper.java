@@ -28,7 +28,7 @@ public class NSDHelper
 
     ArrayList<String> list = new ArrayList<>();
 
-    public List<String> getList()
+    public ArrayList<String> getList()
     {
         return list;
     }
