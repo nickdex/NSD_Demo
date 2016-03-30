@@ -1,15 +1,18 @@
 package me.whichapp.nsddemo;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MyIntentService extends IntentService
+public class MyIntentService extends Service
 {
     public static final String TAG = "MyIntentService";
 
@@ -22,15 +25,36 @@ public class MyIntentService extends IntentService
     public static final String BROADCAST_ACTION = "me.whichapp.nsddemo.BROADCAST";
     public static final String LIST = "me.whichapp.nsddemo.LIST";
 
-
-    public MyIntentService()
-    {
-        super("MyIntentService");
-    }
-
     private NSDHelper nsdHelper;
     private final int port = 9346;
 
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();
+        initialiseNSD();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId)
+    {
+        handleIntent(intent);
+        return Service.START_STICKY;
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent)
+    {
+        return null;
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        nsdHelper.tearDown();
+        super.onDestroy();
+    }
 
     public static void initialiseNSD(Context context)
     {
@@ -61,8 +85,7 @@ public class MyIntentService extends IntentService
         context.startService(intent);
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent)
+    protected void handleIntent(Intent intent)
     {
         if (intent != null)
         {
@@ -114,8 +137,8 @@ public class MyIntentService extends IntentService
             Intent localIntent = new Intent(BROADCAST_ACTION)
                     .putStringArrayListExtra(LIST, nsdHelper.getList());
 
-            Log.d(TAG, "List with updated names sent");
             LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+            Log.d(TAG, "List with updated names sent");
         }
 
     }

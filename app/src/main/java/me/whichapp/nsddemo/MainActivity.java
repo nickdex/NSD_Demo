@@ -26,8 +26,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
     private static final int RQ_PERM = 20;
-    private final int port = 9346;
-    TextView deviceName;
 
     ListView deviceList;
 
@@ -43,7 +41,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        deviceName = (TextView) findViewById(R.id.device_name);
         deviceList = (ListView) findViewById(R.id.listView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -114,6 +111,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent)
         {
+            Log.v(TAG, "Intent received");
             ArrayList<String> newList = intent.getStringArrayListExtra(MyIntentService.LIST);
             list.clear();
             list.addAll(newList);
