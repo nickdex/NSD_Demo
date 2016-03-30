@@ -1,6 +1,7 @@
 package me.whichapp.nsddemo;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
 import android.os.Handler;
@@ -13,9 +14,12 @@ public class MyIntentService extends IntentService
     public static final String TAG = "MyIntentService";
 
     private static final String ACTION_INIT_NSD = "me.whichapp.nsddemo.action.initialiseNSD";
-    private static final String ACTION_CONNECT = "me.whichapp.nsddemo.action.connect";
-    private static final String BROADCAST_ACTION = "me.whichapp.nsddemo.BROADCAST";
+    private static final String ACTION_UPDATE = "me.whichapp.nsddemo.action.UPDATE";
+    private static final String ACTION_DISCOVER = "me.whichapp.nsddemo.action.DISCOVER";
+    private static final String ACTION_REGISTER = "me.whichapp.nsddemo.action.REGISTER";
 
+
+    public static final String BROADCAST_ACTION = "me.whichapp.nsddemo.BROADCAST";
     public static final String LIST = "me.whichapp.nsddemo.LIST";
 
 
@@ -28,17 +32,32 @@ public class MyIntentService extends IntentService
     private final int port = 9346;
 
 
-    public static void registerService(Context context)
+    public static void initialiseNSD(Context context)
     {
         Intent intent = new Intent(context, MyIntentService.class);
         intent.setAction(ACTION_INIT_NSD);
         context.startService(intent);
     }
 
+
+    public static void registerService(Context context)
+    {
+        Intent intent = new Intent(context, MyIntentService.class);
+        intent.setAction(ACTION_REGISTER);
+        context.startService(intent);
+    }
+
+    public static void discover(Context context)
+    {
+        Intent intent = new Intent(context, MyIntentService.class);
+        intent.setAction(ACTION_DISCOVER);
+        context.startService(intent);
+    }
+
     public static void requestUpdate(Context context)
     {
         Intent intent = new Intent(context, MyIntentService.class);
-        intent.setAction(ACTION_CONNECT);
+        intent.setAction(ACTION_UPDATE);
         context.startService(intent);
     }
 
@@ -48,12 +67,20 @@ public class MyIntentService extends IntentService
         if (intent != null)
         {
             final String action = intent.getAction();
-            if (ACTION_INIT_NSD.equals(action))
+            switch (action)
             {
-                initialiseNSD();
-            } else if (ACTION_CONNECT.equals(action))
-            {
-                broadcastList();
+                case ACTION_INIT_NSD:
+                    initialiseNSD();
+                    break;
+                case ACTION_REGISTER:
+                    registerService();
+                    break;
+                case ACTION_DISCOVER:
+                    discoverServices();
+                    break;
+                case ACTION_UPDATE:
+                    broadcastList();
+                    break;
             }
         }
     }
@@ -63,10 +90,19 @@ public class MyIntentService extends IntentService
         nsdHelper = new NSDHelper(this);
         nsdHelper.initializeNsd();
         Log.v(TAG, "NSDHelper initialised");
+    }
 
+    private void registerService()
+    {
         nsdHelper.registerService(port);
         Log.d(TAG, "Service registered on " + port);
     }
+
+    private void discoverServices()
+    {
+        nsdHelper.discoverServices();
+    }
+
 
     private void broadcastList()
     {

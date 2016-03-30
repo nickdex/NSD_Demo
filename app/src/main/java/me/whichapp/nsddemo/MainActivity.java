@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -60,6 +62,9 @@ public class MainActivity extends AppCompatActivity
 
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, list);
         deviceList.setAdapter(adapter);
+
+        ListReceiver receiver = new ListReceiver();
+        LocalBroadcastManager.getInstance(this).registerReceiver(receiver, new IntentFilter(MyIntentService.BROADCAST_ACTION));
     }
 
     @Override
@@ -76,6 +81,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void initialise(View v)
+    {
+        //Initialise NSDHelper
+        if (flag)
+            MyIntentService.initialiseNSD(this);
+    }
+
+    public void discover(View v)
+    {
+        //discover other services
+        if (flag)
+            MyIntentService.discover(this);
+    }
+
+
     public void advertise(View v)
     {
         // Register service
@@ -83,13 +103,13 @@ public class MainActivity extends AppCompatActivity
             MyIntentService.registerService(this);
     }
 
-    public void connect(View v)
+    public void update(View v)
     {
         MyIntentService.requestUpdate(this);
     }
 
 
-    private class ResponseReceiver extends BroadcastReceiver
+    private class ListReceiver extends BroadcastReceiver
     {
         @Override
         public void onReceive(Context context, Intent intent)
